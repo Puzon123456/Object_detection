@@ -1,0 +1,116 @@
+{% extends 'detection_app/base.html' %}
+{% load static %}
+
+{% block title %}Logowanie - System Detekcji Obiektów{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-sign-in-alt me-2"></i>Logowanie</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Nazwa użytkownika lub email</label>
+                            <input type="text" 
+                                   class="form-control" 
+                                   id="username" 
+                                   name="username" 
+                                   required
+                                   placeholder="Wprowadź nazwę użytkownika lub email">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Hasło</label>
+                            <input type="password" 
+                                   class="form-control" 
+                                   id="password" 
+                                   name="password" 
+                                   required
+                                   placeholder="Wprowadź hasło">
+                        </div>
+
+                        <div class="mb-3 form-check">
+                            <input type="checkbox" class="form-check-input" id="remember" name="remember">
+                            <label class="form-check-label" for="remember">Zapamiętaj mnie</label>
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>Zaloguj się
+                            </button>
+                        </div>
+
+                        <input type="hidden" name="next" value="{{ request.GET.next }}">
+                    </form>
+
+                    <div class="mt-4">
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'password_reset' %}" class="text-decoration-none">
+                                <i class="fas fa-key me-1"></i>Zapomniałeś hasła?
+                            </a>
+                            <a href="{% url 'register' %}" class="text-decoration-none">
+                                <i class="fas fa-user-plus me-1"></i>Zarejestruj się
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="text-center">
+                        <p class="text-muted">Lub zaloguj się przez</p>
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-dark" disabled>
+                                <i class="fab fa-google me-2"></i>Google (wkrótce)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" disabled>
+                                <i class="fab fa-facebook me-2"></i>Facebook (wkrótce)
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Informacje dla demo -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6 class="card-title">Demo konta (jeśli masz):</h6>
+                    <small class="text-muted">
+                        <strong>Admin:</strong> admin / admin123<br>
+                        <strong>User:</strong> testuser / testpass123
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Prosta walidacja formularza
+document.querySelector('form').addEventListener('submit', function(e) {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+    
+    if (!username || !password) {
+        e.preventDefault();
+        alert('Proszę wypełnić wszystkie pola');
+    }
+});
+</script>
+{% endblock %}

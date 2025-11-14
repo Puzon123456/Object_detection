@@ -1,0 +1,77 @@
+{% if profile_form %}
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="hidden" name="profile_data_submit" value="1">
+    
+    <!-- Awatar -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="mb-3">
+                <label for="{{ profile_form.avatar.id_for_label }}" class="form-label">
+                    {{ profile_form.avatar.label }}
+                </label>
+                {{ profile_form.avatar }}
+                {% if profile.avatar %}
+                    <div class="mt-2">
+                        <small class="text-muted">Aktualny awatar:</small><br>
+                        <img src="{{ profile.avatar.url }}" alt="Awatar" class="img-thumbnail mt-1" style="max-width: 150px;">
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="mb-3">
+                <label for="{{ profile_form.bio.id_for_label }}" class="form-label">
+                    {{ profile_form.bio.label }}
+                </label>
+                {{ profile_form.bio }}
+                <div class="form-text">Opisz siebie w kilku zdaniach.</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ profile_form.website.id_for_label }}" class="form-label">
+            {{ profile_form.website.label }}
+        </label>
+        {{ profile_form.website }}
+    </div>
+
+    <h5 class="mt-4 mb-3">Media Społecznościowe</h5>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="{{ profile_form.facebook.id_for_label }}" class="form-label">
+                    <i class="fab fa-facebook text-primary me-2"></i>{{ profile_form.facebook.label }}
+                </label>
+                {{ profile_form.facebook }}
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="mb-3">
+                <label for="{{ profile_form.twitter.id_for_label }}" class="form-label">
+                    <i class="fab fa-twitter text-info me-2"></i>{{ profile_form.twitter.label }}
+                </label>
+                {{ profile_form.twitter }}
+            </div>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label for="{{ profile_form.linkedin.id_for_label }}" class="form-label">
+            <i class="fab fa-linkedin text-primary me-2"></i>{{ profile_form.linkedin.label }}
+        </label>
+        {{ profile_form.linkedin }}
+    </div>
+
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>Zapisz zmiany
+        </button>
+        <a href="?tab=overview" class="btn btn-secondary ms-2">
+            <i class="fas fa-times me-2"></i>Anuluj
+        </a>
+    </div>
+</form>
+{% endif %}

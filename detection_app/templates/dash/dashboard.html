@@ -1,0 +1,133 @@
+{% extends 'bas/base.html' %} {% block title %}Dashboard - System Detekcji
+Obiektów{% endblock %} {% block content %}
+<div class="container mt-4">
+  <!-- Powitanie -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="alert alert-success">
+        <h4 class="alert-heading">
+          <i class="fas fa-check-circle me-2"></i>Witaj, {{ user.username }}!
+        </h4>
+        <p class="mb-0">
+          Zostałeś pomyślnie zalogowany do systemu detekcji obiektów.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Statystyki użytkownika -->
+  <div class="row mb-4">
+    <div class="col-md-3">
+      <div class="card text-white bg-primary">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5>Profil</h5>
+              <h2><i class="fas fa-user"></i></h2>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-success">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5>Data dołączenia</h5>
+              <p class="mb-0">{{ user.date_joined|date:"d.m.Y" }}</p>
+            </div>
+            <h2><i class="fas fa-calendar"></i></h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-warning">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5>Email</h5>
+              <p class="mb-0">{{ user.email }}</p>
+            </div>
+            <h2><i class="fas fa-envelope"></i></h2>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card text-white bg-info">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h5>Status</h5>
+              <p class="mb-0">
+                {% if user.is_verified %}
+                <span class="badge bg-success">Zweryfikowany</span>
+                {% else %}
+                <span class="badge bg-secondary">Niezweryfikowany</span>
+                {% endif %}
+              </p>
+            </div>
+            <h2><i class="fas fa-shield-alt"></i></h2>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Szybkie akcje -->
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Szybkie akcje</h5>
+        </div>
+        <div class="card-body">
+          <div class="d-grid gap-2">
+            <a href="{% url 'profile' %}" class="btn btn-outline-primary">
+              <i class="fas fa-user-edit me-2"></i>Edytuj profil
+            </a>
+            <a href="#" class="btn btn-outline-success" disabled>
+              <i class="fas fa-camera me-2"></i>Detekcja obiektów (wkrótce)
+            </a>
+            <a href="#" class="btn btn-outline-info" disabled>
+              <i class="fas fa-history me-2"></i>Historia detekcji (wkrótce)
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-info-circle me-2"></i>Informacje o koncie
+          </h5>
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Nazwa użytkownika:</span>
+              <strong>{{ user.username }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Email:</span>
+              <strong>{{ user.email }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Data rejestracji:</span>
+              <strong>{{ user.date_joined|date:"d.m.Y H:i" }}</strong>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Ostatnie logowanie:</span>
+              <strong>{{ user.last_login|date:"d.m.Y H:i" }}</strong>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

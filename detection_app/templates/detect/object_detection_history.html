@@ -1,0 +1,333 @@
+{% extends 'bas/base.html' %}
+{% load static %}
+
+{% block title %}Historia Detekcji - System Detekcji Obiektów{% endblock %}
+
+{% block extra_css %}
+<style>
+    .history-card {
+        transition: transform 0.2s, box-shadow 0.2s;
+        border: none;
+        border-radius: 10px;
+    }
+    .history-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+    .object-badge {
+        font-size: 0.8rem;
+    }
+    .image-preview {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+    }
+    .status-badge {
+        font-size: 0.75rem;
+    }
+    .empty-state {
+        padding: 3rem 1rem;
+        text-align: center;
+        color: #6c757d;
+    }
+    .pagination .page-link {
+        color: #495057;
+        border: 1px solid #dee2e6;
+    }
+    .pagination .page-item.active .page-link {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Nagłówek -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1><i class="fas fa-history me-2"></i>Historia Detekcji</h1>
+                    <p class="text-muted mb-0">Przeglądaj historię przetworzonych obrazów</p>
+                </div>
+                <div>
+                    <a href="{% url 'object_detection_upload' %}" class="btn btn-primary me-2">
+                        <i class="fas fa-plus me-1"></i>Nowa detekcja
+                    </a>
+                    <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-1"></i>Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+
+
+    <!-- Filtry i wyszukiwanie -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="mb-3">Filtruj wyniki:</h6>
+                    <div class="btn-group" role="group">
+                        <a href="?status=all" class="btn btn-outline-primary btn-sm">Wszystkie</a>
+                        <a href="?status=completed" class="btn btn-outline-success btn-sm">Ukończone</a>
+                        <a href="?status=pending" class="btn btn-outline-warning btn-sm">W kolejce</a>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <h6 class="mb-3">Sortuj według:</h6>
+                    <div class="btn-group" role="group">
+                        <a href="?sort=newest" class="btn btn-outline-secondary btn-sm">Najnowsze</a>
+                        <a href="?sort=oldest" class="btn btn-outline-secondary btn-sm">Najstarsze</a>
+                        <a href="?sort=objects" class="btn btn-outline-secondary btn-sm">Liczba obiektów</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lista historii -->
+    <div class="card">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Lista Analiz</h5>
+        </div>
+        <div class="card-body">
+            {% if user_images %}
+                <div class="list-group list-group-flush">
+                    {% for image in user_images %}
+                    <div class="list-group-item px-0 py-3">
+                        <div class="row align-items-center">
+                            <!-- Podgląd obrazu -->
+                            <div class="col-md-1">
+                                {% if image.original_image %}
+                                    <img src="{{ image.original_image.url }}" 
+                                         alt="Podgląd" 
+                                         class="image-preview"
+                                         onerror="this.src='{% static 'images/placeholder.jpg' %}'">
+                                {% else %}
+                                    <div class="image-preview bg-light d-flex align-items-center justify-content-center">
+                                        <i class="fas fa-image text-muted"></i>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Informacje podstawowe -->
+                            <div class="col-md-3">
+                                <h6 class="mb-1 text-truncate" title="{{ image.original_image.name }}">
+                                    {{ image.original_image.name|truncatechars:30 }}
+                                </h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    {{ image.uploaded_at|date:"d.m.Y H:i" }}
+                                </small>
+                            </div>
+
+                            <!-- Status -->
+                            <div class="col-md-2">
+                                {% if image.processed_image %}
+                                    <span class="badge bg-success status-badge">
+                                        <i class="fas fa-check me-1"></i>Ukończono
+                                    </span>
+                                {% else %}
+                                    <span class="badge bg-warning status-badge">
+                                        <i class="fas fa-clock me-1"></i>W kolejce
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Statystyki -->
+                            <div class="col-md-2">
+                                {% if image.processed_image %}
+                                    <span class="badge bg-primary object-badge">
+                                        <i class="fas fa-cube me-1"></i>{{ image.objects_detected }} obiektów
+                                    </span>
+                                    <br>
+                                    <small class="text-muted">
+                                        <i class="fas fa-clock me-1"></i>{{ image.processing_time|floatformat:2 }}s
+                                    </small>
+                                {% else %}
+                                    <span class="text-muted">—</span>
+                                {% endif %}
+                            </div>
+
+                            <!-- Data przetworzenia -->
+                            <div class="col-md-2">
+                                {% if image.processed_at %}
+                                    <small class="text-muted">
+                                        Przetworzono:<br>
+                                        {{ image.processed_at|date:"d.m.Y H:i" }}
+                                    </small>
+                                {% else %}
+                                    <small class="text-muted">Oczekuje na przetworzenie</small>
+                                {% endif %}
+                            </div>
+
+                            <!-- Akcje -->
+                            <div class="col-md-2 text-end">
+                                <div class="btn-group" role="group">
+                                    {% if image.processed_image %}
+                                        <a href="{% url 'object_detection_process' image.id %}" 
+                                           class="btn btn-outline-primary btn-sm"
+                                           title="Zobacz wyniki">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    {% else %}
+                                        <a href="{% url 'object_detection_process' image.id %}" 
+                                           class="btn btn-outline-warning btn-sm"
+                                           title="Sprawdź status">
+                                            <i class="fas fa-sync"></i>
+                                        </a>
+                                    {% endif %}
+                                    <button type="button" 
+                                            class="btn btn-outline-danger btn-sm"
+                                            data-bs-toggle="modal" 
+                                            data-bs-target="#deleteModal{{ image.id }}"
+                                            title="Usuń">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lista wykrytych obiektów (dla ukończonych) -->
+                        {% if image.processed_image and image.detection_results.objects %}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <small class="text-muted">Wykryte obiekty:</small>
+                                <div class="d-flex flex-wrap gap-1 mt-1">
+                                    {% for obj in image.detection_results.objects|slice:":8" %}
+                                        <span class="badge bg-light text-dark border">
+                                            {{ obj.class_name|title }} ({{ obj.confidence|floatformat:2 }})
+                                        </span>
+                                    {% endfor %}
+                                    {% if image.detection_results.objects|length > 8 %}
+                                        <span class="badge bg-secondary">
+                                            +{{ image.detection_results.objects|length|add:"-8" }} więcej
+                                        </span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    
+                    {% endfor %}
+                </div>
+
+                <!-- Paginacja -->
+                {% if user_images.has_other_pages %}
+                <nav aria-label="Page navigation" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        {% if user_images.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ user_images.previous_page_number }}">Poprzednia</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Poprzednia</span>
+                            </li>
+                        {% endif %}
+
+                        {% for i in user_images.paginator.page_range %}
+                            {% if user_images.number == i %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ i }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ i }}">{{ i }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                        {% if user_images.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ user_images.next_page_number }}">Następna</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled">
+                                <span class="page-link">Następna</span>
+                            </li>
+                        {% endif %}
+                    </ul>
+                </nav>
+                {% endif %}
+
+            {% else %}
+                <!-- Stan pusty -->
+                <div class="empty-state">
+                    <i class="fas fa-history fa-4x mb-3"></i>
+                    <h4>Brak historii analiz</h4>
+                    <p class="mb-4">Nie masz jeszcze żadnych przetworzonych obrazów.</p>
+                    <a href="{% url 'object_detection_upload' %}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>Wykonaj pierwszą analizę
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Szybkie akcje -->
+    {% if user_images %}
+    <div class="card mt-4">
+        <div class="card-header bg-light">
+            <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Szybkie Akcje</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <a href="{% url 'object_detection_upload' %}" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-plus me-2"></i>Nowa analiza
+                    </a>
+                </div>
+                <div class="col-md-4 text-center">
+                    <button class="btn btn-outline-warning w-100" id="refreshBtn">
+                        <i class="fas fa-sync-alt me-2"></i>Odśwież
+                    </button>
+                </div>
+                <div class="col-md-4 text-center">
+                    <button class="btn btn-outline-danger w-100" id="clearHistoryBtn">
+                        <i class="fas fa-trash me-2"></i>Wyczyść historię
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Odśwież stronę
+    document.getElementById('refreshBtn').addEventListener('click', function() {
+        window.location.reload();
+    });
+
+    // Potwierdzenie czyszczenia historii
+    document.getElementById('clearHistoryBtn').addEventListener('click', function() {
+        if (confirm('Czy na pewno chcesz wyczyścić całą historię? Ta operacja jest nieodwracalna.')) {
+            // Tutaj możesz dodać AJAX do czyszczenia historii
+            alert('Funkcja czyszczenia historii będzie dostępna wkrótce.');
+        }
+    });
+
+    // Auto-odświeżanie co 30 sekund jeśli są obrazy w kolejce
+   
+</script>
+{% endblock %}
